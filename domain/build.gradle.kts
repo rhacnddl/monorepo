@@ -1,5 +1,4 @@
 plugins {
-
 }
 
 allOpen {
@@ -16,4 +15,9 @@ noArg {
 
 dependencies {
 
+}
+
+//querydsl
+sourceSets["main"].withConvention(org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet::class) {
+    kotlin.srcDir("$buildDir/generated/source/kapt/main")
 }

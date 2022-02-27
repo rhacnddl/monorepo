@@ -7,6 +7,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     kotlin("plugin.spring") version "1.6.10" apply false
     kotlin("plugin.jpa") version "1.6.10" apply false
+    kotlin("kapt") version "1.3.61"
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_11
@@ -22,6 +23,8 @@ allprojects {
 
 subprojects {
 
+    val querydslVersion = "5.0.0"
+
     apply(plugin = "java")
 
     apply(plugin = "io.spring.dependency-management")
@@ -31,6 +34,7 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = "kotlin-spring") //all-open
     apply(plugin = "kotlin-jpa")
+    apply(plugin = "kotlin-kapt") //querydsl
 
     dependencies {
         //spring boot
@@ -39,6 +43,11 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter-web")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+        //querydsl
+        implementation("com.querydsl:querydsl-jpa:$querydslVersion")
+        kapt("com.querydsl:querydsl-apt:$querydslVersion:jpa")
+        kapt("org.springframework.boot:spring-boot-configuration-processor")
 
         //kotlin
         implementation("org.jetbrains.kotlin:kotlin-reflect")
