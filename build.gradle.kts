@@ -11,7 +11,7 @@ plugins {
     id("com.linecorp.build-recipe-plugin") version "1.1.1"
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 allprojects {
     group = "com.gorany"
@@ -92,7 +92,7 @@ subprojects {
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = "17"
+            jvmTarget = "11"
         }
     }
 

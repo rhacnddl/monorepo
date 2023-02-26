@@ -2,7 +2,7 @@ plugins {
     kotlin("kapt") //querydsl
 }
 
-val querydslVersion = "4.4.0"
+val querydslVersion = "5.0.0"
 
 allOpen {
     annotation("javax.persistence.Entity")
