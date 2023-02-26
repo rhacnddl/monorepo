@@ -8,9 +8,10 @@ plugins {
     kotlin("plugin.spring") version "1.6.10" apply false
     kotlin("plugin.jpa") version "1.6.10" apply false
     kotlin("kapt") version "1.3.61"
+    id("com.linecorp.build-recipe-plugin") version "1.1.1"
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 allprojects {
     group = "com.gorany"
@@ -22,48 +23,60 @@ allprojects {
 }
 
 subprojects {
-
-    val querydslVersion = "5.0.0"
-
     apply(plugin = "java")
 
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "org.springframework.boot")
-    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
 
     apply(plugin = "kotlin")
-    apply(plugin = "kotlin-spring") //all-open
+    apply(plugin = "kotlin-spring") //allopen
     apply(plugin = "kotlin-jpa")
-    apply(plugin = "kotlin-kapt") //querydsl
 
     dependencies {
-        //spring boot
-        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-        implementation("org.springframework.boot:spring-boot-starter-security")
-        implementation("org.springframework.boot:spring-boot-starter-web")
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-        developmentOnly("org.springframework.boot:spring-boot-devtools")
-
-        //querydsl
-        implementation("com.querydsl:querydsl-jpa:$querydslVersion")
-        kapt("com.querydsl:querydsl-apt:$querydslVersion:jpa")
-        kapt("org.springframework.boot:spring-boot-configuration-processor")
-
         //kotlin
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-        //lombok
-        compileOnly("org.projectlombok:lombok")
-        annotationProcessor("org.projectlombok:lombok")
+        // jpa
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5")
 
-        //DB connect
-        runtimeOnly("com.h2database:h2")
-        runtimeOnly("mysql:mysql-connector-java")
+        // jdbc
+        implementation("org.mariadb.jdbc:mariadb-java-client") // AWS Secrets Manager JDBC 는 Wrapper 이기 때문에, 별도로 DB에 맞는 Driver 의존성을 추가해야한다.
+        implementation("mysql:mysql-connector-java")
 
-        //test
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
-        testImplementation("org.springframework.security:spring-security-test")
+        //spring boot
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
+        implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("io.micrometer:micrometer-registry-prometheus")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+        implementation("org.springframework.boot:spring-boot-starter-validation") // kafka 에서 필요
+
+        // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+        implementation("org.apache.commons:commons-lang3:3.12.0")
+
+        // logger
+        implementation("net.logstash.logback:logstash-logback-encoder")
+        implementation("io.github.microutils:kotlin-logging:1.12.5")
+
+        // secret manger SecretCache for Other type of secret (API key, OAuth token, other.)
+        implementation("com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.0.1")
+        implementation("com.amazonaws.secretsmanager:aws-secretsmanager-jdbc:1.0.10") // AWS Secrets Manager JDBC
+
+        //retryable
+        implementation("org.springframework.retry:spring-retry:1.2.5.RELEASE")
+
+
+        // test
+        implementation("com.h2database:h2")
+        testImplementation("org.springframework.boot:spring-boot-starter-test") {
+            exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+        }
+
+        //mockk
+        testImplementation("io.mockk:mockk:1.12.0")
+        testImplementation("com.ninja-squad:springmockk:2.0.3")
     }
 
     dependencyManagement {
@@ -79,7 +92,7 @@ subprojects {
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = "11"
+            jvmTarget = "17"
         }
     }
 
@@ -94,15 +107,67 @@ subprojects {
     }
 }
 
-//api <- domain 의존
 project(":api") {
     dependencies {
+        api(project(":common-lib"))
+        implementation(project(":application"))
+        runtimeOnly(project(":infrastructure"))
+
+        testImplementation(project(":application"))
+        testImplementation(project(":domain"))
+        testImplementation(project(":infrastructure"))
+    }
+}
+
+project(":application") {
+    dependencies {
+        api(project(":common-lib"))
         implementation(project(":domain"))
     }
 }
 
-//domain 설정
+project(":infrastructure") {
+    dependencies {
+        implementation(project(":domain"))
+        implementation(project(":application"))
+        api(project(":common-lib"))
+
+        testImplementation(project(":domain"))
+        testImplementation(project(":application"))
+    }
+}
+
 project(":domain") {
+    dependencies {
+        api(project(":common-lib"))
+    }
+}
+
+project(":domain") {
+    val jar: Jar by tasks
+    val bootJar: BootJar by tasks
+
+    bootJar.enabled = false
+    jar.enabled = true
+}
+
+project(":common-lib") {
+    val jar: Jar by tasks
+    val bootJar: BootJar by tasks
+
+    bootJar.enabled = false
+    jar.enabled = true
+}
+
+project(":application") {
+    val jar: Jar by tasks
+    val bootJar: BootJar by tasks
+
+    bootJar.enabled = false
+    jar.enabled = true
+}
+
+project(":infrastructure") {
     val jar: Jar by tasks
     val bootJar: BootJar by tasks
 
