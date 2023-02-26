@@ -3,7 +3,7 @@ package com.gorany.user
 import com.gorany.base.BaseDomain
 import com.gorany.enum.UserRole
 
-data class User private constructor(
+data class User(
     val id: Long = 0L,
     val email: String,
     val password: String,

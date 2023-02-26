@@ -1,7 +1,6 @@
 package com.gorany.user
 
 import com.gorany.user.entity.UserHistoryEntity
-import com.gorany.user.entity.UserMapper
 import com.gorany.user.repository.UserHistoryJpaRepository
 import com.gorany.user.repository.UserJpaRepository
 import com.gorany.user.repository.UserRepository
@@ -18,5 +17,10 @@ class UserPersistenceAdapter(
 
         userJpaRepository.save(entity)
         userHistoryJpaRepository.save(UserHistoryEntity.of(entity))
+    }
+
+    override fun findByEmail(email: String): User? {
+        return (userJpaRepository.findByEmail(email))
+            ?.let { UserMapper.toDomain(it) }
     }
 }

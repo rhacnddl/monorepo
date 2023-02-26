@@ -1,7 +1,7 @@
-package com.gorany.user.entity
+package com.gorany.user
 
 import com.gorany.base.BaseMapper
-import com.gorany.user.User
+import com.gorany.user.entity.UserEntity
 
 object UserMapper: BaseMapper<User, UserEntity, User, UserEntity>() {
     override fun toDomainWithoutBase(entity: UserEntity): User {
