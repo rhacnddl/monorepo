@@ -1,4 +1,47 @@
 spring:
-  h2:
-    console:
-      enabled: true
+  application:
+    name: internal-api
+  profiles:
+    active: local
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  web:
+    resources:
+      add-mappings: false
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-timeout: 3000
+      max-lifetime: 60000
+      maximum-pool-size: 10
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+      base-path: /
+      path-mapping:
+        health: health
+        prometheus: metrics
