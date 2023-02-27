@@ -22,10 +22,8 @@ data class User(
             )
         }
 
-        private fun validatePassword(password: String): Boolean {
-            require(password.length >= 8)
-
-            return true
+        private fun validatePassword(password: String) {
+            require(password.length >= 8) { "비밀번호는 8자 이상이어야 합니다." }
         }
     }
 }
