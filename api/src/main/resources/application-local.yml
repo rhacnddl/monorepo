@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  h2:
+    console:
+      enabled: true
+
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: sa
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
