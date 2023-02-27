@@ -98,6 +98,25 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+
+        testLogging {
+            events("passed", "failed", "skipped")
+            setExceptionFormat("full")
+        }
+    }
+
+    tasks.test {
+        useJUnitPlatform() {
+            includeTags("unitTest")
+            excludeTags("integrationTest")
+        }
+    }
+
+    task<Test>("integration") {
+        useJUnitPlatform() {
+            excludeTags("unitTest")
+            includeTags("integrationTest")
+        }
     }
 
     configurations {
